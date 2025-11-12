@@ -47,10 +47,12 @@ jobs:
 
       - run: corepack enable
 
-      - name: Run image
-        uses: abatilo/actions-poetry@v3
+      - uses: actions/setup-python@v5
         with:
-          poetry-version: 3.14
+          python-version: 3.14
+      - uses: abatilo/actions-poetry@v3
+        with:
+          poetry-version: latest
 
       - name: Install system-wide tools dependencies
         run: |
