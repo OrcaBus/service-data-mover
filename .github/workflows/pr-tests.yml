@@ -31,7 +31,7 @@ permissions: read-all
 jobs:
   pre-commit-lint-security:
     runs-on: ubuntu-latest
-    if: ${{ !github.event.pull_request.draft && github.repository != 'OrcaBus/service-data-mover' }}
+    if: ${{ !github.event.pull_request.draft }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -77,7 +77,7 @@ jobs:
   test-iac:
     runs-on: ubuntu-22.04-arm
     # Template service base is broken with
-    if: ${{ !github.event.pull_request.draft && github.repository != 'OrcaBus/service-data-mover' }}
+    if: ${{ !github.event.pull_request.draft }}
     steps:
       - uses: actions/checkout@v4
 
