@@ -1,13 +1,12 @@
 {
-  "name": "template-service-base",
-  "version": "1.0.0",
+  "name": "service-data-mover",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "tsc && jest",
     "cdk": "cdk",
     "cdk-stateless": "cdk -c deployMode=stateless",
-    "cdk-stateful": "cdk -c deployMode=stateful",
     "prepare": "pre-commit install",
     "prettier": "prettier --check .",
     "prettier-fix": "prettier --write .",
@@ -22,24 +21,24 @@
   "license": "MIT",
   "packageManager": "pnpm@10.8.0",
   "devDependencies": {
-    "@eslint/js": "^9.23.0",
+    "@eslint/js": "^9.39.1",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.13.13",
-    "aws-cdk": "^2.1006.0",
-    "cdk-nag": "^2.35.56",
-    "eslint": "^9.23.0",
-    "globals": "^16.0.0",
+    "@types/node": "^24.10.1",
+    "aws-cdk": "^2.1031.2",
+    "cdk-nag": "^2.37.55",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
     "jest": "^29.7.0",
-    "prettier": "^3.5.3",
+    "prettier": "^3.6.2",
     "test-js": "^0.0.4",
-    "ts-jest": "^29.3.0",
+    "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2",
-    "typescript-eslint": "^8.28.0"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4"
   },
   "dependencies": {
-    "aws-cdk-lib": "^2.195.0",
-    "constructs": "^10.4.2",
-    "@orcabus/platform-cdk-constructs": "0.0.12"
+    "aws-cdk-lib": "^2.223.0",
+    "constructs": "^10.4.3",
+    "@orcabus/platform-cdk-constructs": "0.0.97"
   }
 }

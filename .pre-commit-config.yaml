@@ -1,7 +1,6 @@
 repos:
-
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-added-large-files
         exclude: ^(pnpm-lock.yaml)
@@ -22,16 +21,15 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v9.17.0
+    rev: v9.39.1
     hooks:
       - id: eslint
         files: \.(m|c)?[jt]sx?$
         types: [ file ]
         exclude: pnpm-lock.yaml
 
-  - repo: local
+  - repo: https://github.com/rbubley/mirrors-prettier
+    rev: v3.6.2
     hooks:
       - id: prettier
-        name: prettier Format
-        entry: pnpm prettier
-        language: system
+        exclude: pnpm-lock.yaml

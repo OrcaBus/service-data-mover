@@ -13,3 +13,6 @@ cdk.out
 # IDE
 .idea
 .DS_Store
+
+app/.ruff_cache
+app/response.json
