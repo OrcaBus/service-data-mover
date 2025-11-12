@@ -1,23 +1,24 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { DeploymentStackPipeline } from '@orcabus/platform-cdk-constructs/deployment-stack-pipeline';
-import { getStackProps } from '../stage/config';
+import { getDataMigrateStackProps } from '../stage/config';
+import { DataMigrateStack } from '../stage/deployment-stack';
 
 export class StatelessStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     new DeploymentStackPipeline(this, 'DeploymentPipeline', {
-      githubBranch: 'main',
-      githubRepo: /** TODO: Replace with string. Example: */ 'service-microservice-manager',
-      stack: /** TODO: Replace with Stack (e.g. TheStatelessStack) */ undefined as unknown,
-      stackName: /** TODO: Replace with string. Example: */ 'StatelessMicroserviceManager',
+      githubBranch: 'init',
+      githubRepo: 'service-data-mover',
+      stack: DataMigrateStack,
+      stackName: 'DataMigrateStack',
       stackConfig: {
-        beta: getStackProps('BETA'),
-        gamma: getStackProps('GAMMA'),
-        prod: getStackProps('PROD'),
+        beta: getDataMigrateStackProps('BETA'),
+        gamma: getDataMigrateStackProps('GAMMA'),
+        prod: getDataMigrateStackProps('PROD'),
       },
-      pipelineName: /** TODO: Replace with string. Example: */ 'OrcaBus-StatelessMicroservice',
+      pipelineName: 'OrcaBus-StatelessMicroservice',
       cdkSynthCmd: ['pnpm install --frozen-lockfile --ignore-scripts', 'pnpm cdk-stateless synth'],
     });
   }
