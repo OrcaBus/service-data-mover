@@ -1,13 +1,12 @@
 {
-  "name": "template-service-base",
-  "version": "1.0.0",
+  "name": "service-data-mover",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "tsc && jest",
     "cdk": "cdk",
     "cdk-stateless": "cdk -c deployMode=stateless",
-    "cdk-stateful": "cdk -c deployMode=stateful",
     "prepare": "pre-commit install",
     "prettier": "prettier --check .",
     "prettier-fix": "prettier --write .",
@@ -40,6 +39,6 @@
   "dependencies": {
     "aws-cdk-lib": "^2.195.0",
     "constructs": "^10.4.2",
-    "@orcabus/platform-cdk-constructs": "0.0.12"
+    "@orcabus/platform-cdk-constructs": "0.0.95"
   }
 }

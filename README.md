@@ -34,73 +34,87 @@ Template Service
 Service Description
 --------------------------------------------------------------------------------
 
+The data mover service moves data between S3 locations.
+
 ### Name & responsibility
+
+It is responsible for archiving data or copying it to another location.
 
 ### Description
 
-### API Endpoints
+Locally, use the data mover to move or copy data between locations:
 
-This service provides a RESTful API following OpenAPI conventions.
-The Swagger documentation of the production endpoint is available here:
+```sh
+poetry run dm move --source <SOURCE> --destination <DESTINATION>
+```
 
+This command is also deployed as a fargate task triggered by step functions.
+The step functions expects as input a JSON which specifies the command (move or copy),
+a source and a destination. For example, to move a specified `portalRunId` into the archive
+bucket (this is probably easier in the step functions console):
 
-### Consumed Events
-
-| Name / DetailType | Source         | Schema Link       | Description         |
-|-------------------|----------------|-------------------|---------------------|
-| `SomeServiceStateChange` | `orcabus.someservice` | <schema link> | Announces service state changes |
-
-### Published Events
-
-| Name / DetailType | Source         | Schema Link       | Description         |
-|-------------------|----------------|-------------------|---------------------|
-| `TemplateStateChange` | `orcabus.templatemanager` | <schema link> | Announces Template data state changes |
-
-
-### (Internal) Data states & persistence model
-
-### Major Business Rules
+```sh
+export ARN=$(aws stepfunctions list-state-machines | jq -r '.stateMachines | .[] | select(.name == "orcabus-data-migrate-mover") | .stateMachineArn')
+export COMMAND="move"
+export SOURCE="s3://umccr-temp-dev/move_test_2"
+export DESTINATION="s3://filemanager-inventory-test/move_test_2"
+aws stepfunctions start-execution --state-machine-arn $ARN  --input "{\"command\" : \"$COMMAND\", \"source\": \"$SOURCE\", \"destination\": \"$DESTINATION\" }"
+```
 
 ### Permissions & Access Control
 
+This tool requires permissions to read from, put and delete from buckets.
+
+For buckets that the data mover reads from, it requires:
+* `s3:ListBucket`
+* `s3:GetObject`
+* `s3:GetObjectVersion`
+* `s3:GetObjectTagging`
+* `s3:GetObjectVersionTagging`
+
+For buckets that data gets copied or moved to, the following it required:
+* `s3:PutObject`
+* `s3:PutObjectTagging`
+* `s3:PutObjectVersionTagging`
+* `s3:ListBucket`
+
+And, for deleting an object from a bucket when using moves, it requires:
+* `s3:DeleteObject`
+
+The infrastructure that deploys the fargate step functions task also requires:
+* `states:SendTaskSuccess`
+* `states:SendTaskFailure`
+* `states:SendTaskHeartbeat`
+
 ### Change Management
 
-#### Versioning strategy
+This service employs a CI/CD pipeline that automatically builds and releases all changes to the `main` code branch.
 
-E.g. Manual tagging of git commits following Semantic Versioning (semver) guidelines.
+There are no automated changelogs or releases, however semantic versioning is followed for any manual release, and
+[conventional commits][conventional-commits] are used for future automation.
 
-#### Release management
-
-The service employs a fully automated CI/CD pipeline that automatically builds and releases all changes to the `main` code branch.
-
+[conventional-commits]: https://www.conventionalcommits.org/en/v1.0.0/
 
 Infrastructure & Deployment
 --------------------------------------------------------------------------------
 
-Short description with diagrams where appropriate.
-Deployment settings / configuration (e.g. CodePipeline(s) / automated builds).
+The data mover deploys a simple step function that runs a fargate task to either move or copy data. This wraps the
+underlying python cli defined in the [app] directory.
 
-Infrastructure and deployment are managed via CDK. This template provides two types of CDK entry points: `cdk-stateless` and `cdk-stateful`.
+The nfrastructure and deployment are managed via CDK. Since this is a stateless-only service, the template provides a
+stateless entrypoint: `cdk-stateless`.
 
-
-### Stateful
-
-- Queues
-- Buckets
-- Database
-- ...
+[app]: app
 
 ### Stateless
-- Lambdas
+- Fargate
 - StepFunctions
-
 
 ### CDK Commands
 
 You can access CDK commands using the `pnpm` wrapper script.
 
-- **`cdk-stateless`**: Used to deploy stacks containing stateless resources (e.g., AWS Lambda), which can be easily redeployed without side effects.
-- **`cdk-stateful`**: Used to deploy stacks containing stateful resources (e.g., AWS DynamoDB, AWS RDS), where redeployment may not be ideal due to potential side effects.
+- **`cdk-stateless`**: Used to deploy stacks containing the stateless resources, which can be easily redeployed without side effects.
 
 The type of stack to deploy is determined by the context set in the `./bin/deploy.ts` file. This ensures the correct stack is executed based on the provided context.
 
@@ -109,9 +123,6 @@ For example:
 ```sh
 # Deploy a stateless stack
 pnpm cdk-stateless <command>
-
-# Deploy a stateful stack
-pnpm cdk-stateful <command>
 ```
 
 ### Stacks
@@ -127,12 +138,11 @@ pnpm cdk-stateless ls
 Example output:
 
 ```sh
-OrcaBusStatelessServiceStack
-OrcaBusStatelessServiceStack/DeploymentPipeline/OrcaBusBeta/DeployStack (OrcaBusBeta-DeployStack)
-OrcaBusStatelessServiceStack/DeploymentPipeline/OrcaBusGamma/DeployStack (OrcaBusGamma-DeployStack)
-OrcaBusStatelessServiceStack/DeploymentPipeline/OrcaBusProd/DeployStack (OrcaBusProd-DeployStack)
+OrcaBusStatelessDataMoverStack
+OrcaBusStatelessDataMoverStack/DeploymentPipeline/OrcaBusBeta/DataMigrateStack (OrcaBusBeta-DataMigrateStack)
+OrcaBusStatelessDataMoverStack/DeploymentPipeline/OrcaBusGamma/DataMigrateStack (OrcaBusGamma-DataMigrateStack)
+OrcaBusStatelessDataMoverStack/DeploymentPipeline/OrcaBusProd/DataMigrateStack (OrcaBusProd-DataMigrateStack)
 ```
-
 
 Development
 --------------------------------------------------------------------------------
@@ -145,7 +155,7 @@ The project is organized into the following key directories:
 
 - **`./app`**: Contains the main application logic. You can open the code editor directly in this folder, and the application should run independently.
 
-- **`./bin/deploy.ts`**: Serves as the entry point of the application. It initializes two root stacks: `stateless` and `stateful`. You can remove one of these if your service does not require it.
+- **`./bin/deploy.ts`**: Serves as the entry point of the application. It initializes the `stateless` stack.
 
 - **`./infrastructure`**: Contains the infrastructure code for the project:
   - **`./infrastructure/toolchain`**: Includes stacks for the stateless and stateful resources deployed in the toolchain account. These stacks primarily set up the CodePipeline for cross-environment deployments.
@@ -156,7 +166,6 @@ The project is organized into the following key directories:
 - **`.github/workflows/pr-tests.yml`**: Configures GitHub Actions to run tests for `make check` (linting and code style), tests defined in `./test`, and `make test` for the `./app` directory. Modify this file as needed to ensure the tests are properly configured for your environment.
 
 - **`./test`**: Contains tests for CDK code compliance against `cdk-nag`. You should modify these test files to match the resources defined in the `./infrastructure` folder.
-
 
 ### Setup
 
@@ -171,7 +180,6 @@ npm install --global corepack@latest
 
 # Enable Corepack to use pnpm
 corepack enable pnpm
-
 ```
 
 #### Install Dependencies
@@ -181,11 +189,6 @@ To install all required dependencies, run:
 ```sh
 make install
 ```
-
-#### First Steps
-
-Before using this template, search for all instances of `TODO:` comments in the codebase and update them as appropriate for your service. This includes replacing placeholder values (such as stack names).
-
 
 ### Conventions
 
@@ -210,21 +213,8 @@ make fix
 
 ### Testing
 
-
-Unit tests are available for most of the business logic. Test code is hosted alongside business in `/tests/` directories.
+Test code is hosted alongside business in `/tests/` directories.
 
 ```sh
 make test
 ```
-
-Glossary & References
---------------------------------------------------------------------------------
-
-For general terms and expressions used across OrcaBus services, please see the platform [documentation](https://github.com/OrcaBus/wiki/blob/main/orcabus-platform/README.md#glossary--references).
-
-Service specific terms:
-
-| Term      | Description                                      |
-|-----------|--------------------------------------------------|
-| Foo | ... |
-| Bar | ... |
