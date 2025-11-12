@@ -7,13 +7,13 @@ readme = "README.md"
 packages = [{ include = "data_mover" }]
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = "^3.14"
 boto3 = "^1"
 mypy-boto3-stepfunctions = "^1"
 click = "^8"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.7"
+ruff = "^0.14"
 
 [build-system]
 requires = ["poetry-core"]
