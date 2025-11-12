@@ -18,7 +18,7 @@ export class StatelessStack extends cdk.Stack {
         gamma: getDataMigrateStackProps('GAMMA'),
         prod: getDataMigrateStackProps('PROD'),
       },
-      pipelineName: 'OrcaBus-StatelessMicroservice',
+      pipelineName: 'OrcaBus-StatelessDataMover',
       cdkSynthCmd: ['pnpm install --frozen-lockfile --ignore-scripts', 'pnpm cdk-stateless synth'],
     });
   }

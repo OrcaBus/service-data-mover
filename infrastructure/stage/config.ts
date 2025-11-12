@@ -9,8 +9,8 @@ import {
   ONCOANALYSER_BUCKET,
 } from '@orcabus/platform-cdk-constructs/shared-config/s3';
 import {
-  FILE_MANAGER_BUCKETS,
   FILE_MANAGER_CACHE_BUCKETS,
+  FILE_MANAGER_INVENTORY_BUCKET,
 } from '@orcabus/platform-cdk-constructs/shared-config/file-manager';
 
 export const getDataMigrateStackProps = (stage: StageName): DataMigrateStackProps => {
@@ -19,10 +19,15 @@ export const getDataMigrateStackProps = (stage: StageName): DataMigrateStackProp
   let writeToBuckets = [];
   switch (stage) {
     case 'BETA':
-      // For dev we can write to and read from all filemanager buckets.
-      readFromBuckets = [...FILE_MANAGER_BUCKETS.BETA, ...FILE_MANAGER_CACHE_BUCKETS.BETA];
-      deleteFromBuckets = [...FILE_MANAGER_BUCKETS.BETA, ...FILE_MANAGER_CACHE_BUCKETS.BETA];
-      writeToBuckets = [...FILE_MANAGER_BUCKETS.BETA, ...FILE_MANAGER_CACHE_BUCKETS.BETA];
+      // For dev/staging we can write to and read from the same set of buckets.
+      readFromBuckets = [ONCOANALYSER_BUCKET.BETA, ...FILE_MANAGER_CACHE_BUCKETS.BETA];
+      deleteFromBuckets = [ONCOANALYSER_BUCKET.BETA, ...FILE_MANAGER_CACHE_BUCKETS.BETA];
+      // For dev additionally, write to the filemanager inventory bucket for testing.
+      writeToBuckets = [
+        FILE_MANAGER_INVENTORY_BUCKET,
+        ONCOANALYSER_BUCKET.BETA,
+        ...FILE_MANAGER_CACHE_BUCKETS.BETA,
+      ];
       break;
     case 'GAMMA':
       readFromBuckets = [ONCOANALYSER_BUCKET.GAMMA, ...FILE_MANAGER_CACHE_BUCKETS.GAMMA];
