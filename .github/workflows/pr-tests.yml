@@ -47,16 +47,14 @@ jobs:
 
       - run: corepack enable
 
-      - name: Print toolchain versions
-        run: |
-          node -v
-          python3 -V
-          pip3 -V
-          make --version
+      - name: Run image
+        uses: abatilo/actions-poetry@v3
+        with:
+          poetry-version: 3.14
 
       - name: Install system-wide tools dependencies
         run: |
-          pip3 install pre-commit detect-secrets black ggshield
+          pip3 install pre-commit
 
       - name: TruffleHog OSS
         uses: trufflesecurity/trufflehog@v3.34.0
