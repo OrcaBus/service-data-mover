@@ -9,7 +9,7 @@ export class StatelessStack extends cdk.Stack {
     super(scope, id, props);
 
     new DeploymentStackPipeline(this, 'DeploymentPipeline', {
-      githubBranch: 'init',
+      githubBranch: 'main',
       githubRepo: 'service-data-mover',
       stack: DataMigrateStack,
       stackName: 'DataMigrateStack',
